@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "motion-nba",
+    "description": "The name of the application"
+  },
+  "appShortName": {
+    "message": "motion-nba",
+    "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
+  },
+  "appDescription": {
+    "message": "每日篮球赛事文字播报，可配合摄像头进行运动物体检测，办公偷闲好助手",
+    "description": "The description of the application"
+  },
+  "browserActionTitle": {
+    "message": "motion-nba",
+    "description": "The title of the browser action button"
+  }
+}

@@ -1,0 +1,60 @@
+#motion-nba-content {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  position: fixed;
+  z-index: -1;
+  visibility: hidden;
+  pointer-events: none;
+}
+#motion-nba-content #canvas-source {
+  width: 100%; }
+#motion-nba-content #canvas-source, #motion-nba-content #canvas-highlights {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0; }
+#motion-nba-content #canvas-blended {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  opacity: 0; }
+#motion-nba-content #hotSpots {
+  position: relative;
+  display: none;
+  height: 100%; }
+#motion-nba-content #hotSpots > * {
+  position: absolute;
+  -moz-transition: all 80ms linear;
+  -webkit-transition: all 80ms linear;
+  transition: all 80ms linear; }
+#motion-nba-content .active {
+  background: rgba(255, 255, 255, 0.7);
+  -moz-transition: all 150ms linear;
+  -webkit-transition: all 150ms linear;
+  transition: all 150ms linear; }
+#motion-nba-content #left {
+  width: 10%;
+  height: 40%;
+  top: 50%;
+  left: 0;
+  margin-top: -20%; }
+#motion-nba-content #top {
+  width: 20%;
+  height: 10%;
+  top: 0;
+  left: 50%;
+  margin-left: -10%; }
+#motion-nba-content #right {
+  width: 10%;
+  height: 40%;
+  top: 50%;
+  right: 0;
+  margin-top: -20%; }
+#motion-nba-content .link {
+  font-size: 22px;
+  color: #fff;
+  padding: .5%; }

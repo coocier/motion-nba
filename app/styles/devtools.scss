@@ -1,0 +1,43 @@
+@charset "UTF-8";
+
+body {
+  font-size: 12px;
+}
+
+.game-list-wrap {
+  margin-bottom: 2rem;
+  .title {
+    color: #333;
+  }
+  .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-color: #bbbbbb;
+    border-right-color: transparent;
+  }
+  #gameInfo {
+    position: relative;
+  }
+  #gameOver {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    top: 50%;
+    margin-top: -20px;
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+  .status {
+    position: absolute;
+    right: 0;
+    top: 0;
+    svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
