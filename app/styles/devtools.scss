@@ -2,6 +2,15 @@
 
 body {
   font-size: 12px;
+  &.dark {
+    background-color: #242424;
+    color: #fff;
+    .game-list-wrap {
+      .title {
+        color: #fff;
+      }
+    }
+  }
 }
 
 .game-list-wrap {

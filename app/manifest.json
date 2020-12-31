@@ -21,11 +21,13 @@
     "chrome_style": true
   },
   "permissions": [
+    "activeTab",
     "tabs",
     "storage",
     "commands",
     "notifications",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "<all_urls>"
   ]
 }

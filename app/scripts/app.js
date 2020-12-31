@@ -1,5 +1,6 @@
-(function () {
+export function startCameraDetect() {
 
+  require('./jquery.min.js');
   // config start
   var OUTLINES = false;
   // config end
@@ -26,7 +27,7 @@
     canvases.height(content.height());
     content.css('left', (w - content.width()) / 2);
     content.css('top', ((h - content.height()) / 2) + 55);
-  }
+  };
   $(window).resize(resize);
   $(window).ready(function () {
     resize();
@@ -69,20 +70,20 @@
       // 防止在新的浏览器里使用它，应为它已经不再支持了
       video.src = window.URL.createObjectURL(stream);
     }
-    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-      if (request.cmd === 'closeCamera' || request.cmd === 'disconnect') {
-        video.pause();
-        if ("srcObject" in video) {
-          video.src = '';
-        } else {
-          video.srcObject = '';
-        }
-        stream.getTracks().forEach(function(track) {
-          track.stop();
-        });
-      }
-      return true;
-    });
+    // chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    //   if (request.cmd === 'closeCamera' || request.cmd === 'disconnect') {
+    //     video.pause();
+    //     if ("srcObject" in video) {
+    //       video.src = '';
+    //     } else {
+    //       video.srcObject = '';
+    //     }
+    //     stream.getTracks().forEach(function(track) {
+    //       track.stop();
+    //     });
+    //   }
+    //   return true;
+    // });
     start();
   }).catch(webcamError);
 
@@ -216,4 +217,38 @@
       ctx.strokeRect(o.x, o.y, o.width, o.height);
     });
   }
-})();
+
+  (function () {
+    // consider using a debounce utility if you get too many consecutive events
+    $(window).off('motion').on('motion', function (ev, data) {
+      chrome.storage.sync.get({confidence: 1},function (items) {
+        if(data.confidence < 255 && data.confidence >= Math.floor(items.confidence)) {
+          console.log('detected motion at', new Date(), 'with data:', data);
+          chrome.runtime.sendMessage({cmd: 'motionDetect', value: data});
+        }
+      });
+
+      var spot = $(data.spot.el);
+      spot.addClass('active');
+      setTimeout(function () {
+        spot.removeClass('active');
+      }, 230);
+    });
+  })();
+
+
+};
+
+export function closeCamera() {
+  var video = $('#webcam')[0];
+  var stream = video.srcObject;
+  video.pause();
+  if ("srcObject" in video) {
+    video.src = '';
+  } else {
+    video.srcObject = '';
+  }
+  stream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+}

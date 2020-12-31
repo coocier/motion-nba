@@ -69,6 +69,8 @@ if(process.env.NODE_ENV === 'development'){
 }
 ```
 
+## Generator
+https://github.com/kurotojp/vulnerability-chrome-extension
 
 
 
