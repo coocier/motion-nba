@@ -62,7 +62,7 @@ export function startCameraDetect() {
     }
   }
 
-  navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(function (stream) {
+  navigator.mozGetUserMedia({audio: false, video: true}).then(function (stream) {
     // 旧的浏览器可能没有srcObject
     if ("srcObject" in video) {
       video.srcObject = stream;
@@ -70,20 +70,6 @@ export function startCameraDetect() {
       // 防止在新的浏览器里使用它，应为它已经不再支持了
       video.src = window.URL.createObjectURL(stream);
     }
-    // chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    //   if (request.cmd === 'closeCamera' || request.cmd === 'disconnect') {
-    //     video.pause();
-    //     if ("srcObject" in video) {
-    //       video.src = '';
-    //     } else {
-    //       video.srcObject = '';
-    //     }
-    //     stream.getTracks().forEach(function(track) {
-    //       track.stop();
-    //     });
-    //   }
-    //   return true;
-    // });
     start();
   }).catch(webcamError);
 

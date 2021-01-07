@@ -3,104 +3,97 @@
 
 import {closeCamera, startCameraDetect} from './app';
 
-const removeCameraDom = () => {
-  let oldContent = document.getElementById('motion-nba-content');
-  if (oldContent != null) oldContent.parentNode.removeChild(oldContent);
-};
+class Content {
+  init() {
+    this.createCameraDom();
+    this.messageConnect();
+  }
 
-const createCameraDom = () => {
-  removeCameraDom();
+  removeCameraDom() {
+    let oldContent = document.getElementById('motion-nba-content');
+    if (oldContent != null) oldContent.parentNode.removeChild(oldContent);
+  }
 
-  let parent = document.createElement('div');
-  parent.setAttribute('id', 'motion-nba-content');
+  createCameraDom() {
+    this.removeCameraDom();
 
-  let video = document.createElement('video');
-  video.setAttribute('style','display:none');
-  video.setAttribute('id','webcam');
-  video.setAttribute('autoplay', 'autoplay');
-  video.setAttribute('width', '640');
-  video.setAttribute('height', '480');
+    let parent = document.createElement('div');
+    parent.setAttribute('id', 'motion-nba-content');
 
-  let canvas1 = document.createElement('canvas');
-  canvas1.setAttribute('id', 'canvas-source');
-  canvas1.setAttribute('width', '640');
-  canvas1.setAttribute('height', '480');
+    let video = document.createElement('video');
+    video.setAttribute('style','display:none');
+    video.setAttribute('id','webcam');
+    video.setAttribute('autoplay', 'autoplay');
+    video.setAttribute('width', '640');
+    video.setAttribute('height', '480');
 
-  let canvas2 = document.createElement('canvas');
-  canvas2.setAttribute('id', 'canvas-highlights');
-  canvas2.setAttribute('width', '640');
-  canvas2.setAttribute('height', '480');
+    let canvas1 = document.createElement('canvas');
+    canvas1.setAttribute('id', 'canvas-source');
+    canvas1.setAttribute('width', '640');
+    canvas1.setAttribute('height', '480');
 
-  let canvas3 = document.createElement('canvas');
-  canvas3.setAttribute('id', 'canvas-blended');
-  canvas3.setAttribute('width', '640');
-  canvas3.setAttribute('height', '480');
+    let canvas2 = document.createElement('canvas');
+    canvas2.setAttribute('id', 'canvas-highlights');
+    canvas2.setAttribute('width', '640');
+    canvas2.setAttribute('height', '480');
 
-  let hotSpotsFrame = document.createElement('div');
-  hotSpotsFrame.setAttribute('id', 'hotSpots');
+    let canvas3 = document.createElement('canvas');
+    canvas3.setAttribute('id', 'canvas-blended');
+    canvas3.setAttribute('width', '640');
+    canvas3.setAttribute('height', '480');
 
-  let hotSpot1 = document.createElement('div');
-  hotSpot1.setAttribute('id', 'left');
+    let hotSpotsFrame = document.createElement('div');
+    hotSpotsFrame.setAttribute('id', 'hotSpots');
 
-  let hotSpot2 = document.createElement('div');
-  hotSpot2.setAttribute('id', 'top');
+    let hotSpot1 = document.createElement('div');
+    hotSpot1.setAttribute('id', 'left');
 
-  let hotSpot3 = document.createElement('div');
-  hotSpot3.setAttribute('id', 'right');
+    let hotSpot2 = document.createElement('div');
+    hotSpot2.setAttribute('id', 'top');
 
-  hotSpotsFrame.appendChild(hotSpot1);
-  hotSpotsFrame.appendChild(hotSpot2);
-  hotSpotsFrame.appendChild(hotSpot3);
+    let hotSpot3 = document.createElement('div');
+    hotSpot3.setAttribute('id', 'right');
 
-  parent.appendChild(video);
-  parent.appendChild(canvas1);
-  parent.appendChild(canvas2);
-  parent.appendChild(canvas3);
-  parent.appendChild(hotSpotsFrame);
+    hotSpotsFrame.appendChild(hotSpot1);
+    hotSpotsFrame.appendChild(hotSpot2);
+    hotSpotsFrame.appendChild(hotSpot3);
 
-  document.body.appendChild(parent);
-};
+    parent.appendChild(video);
+    parent.appendChild(canvas1);
+    parent.appendChild(canvas2);
+    parent.appendChild(canvas3);
+    parent.appendChild(hotSpotsFrame);
 
-const messageConnect = () => {
-  let port = chrome.runtime.connect({
-    name: "contentscript"
-  });
+    document.body.appendChild(parent);
+  }
 
-  port.onMessage.addListener(({cmd, value}) => {
+  handleMessage({cmd, value}) {
+    console.log('message:', cmd);
     switch (cmd) {
-      case 'setConfidence':
+      case 'set-confidence':
         chrome.storage.local.set({confidence: value});
         break;
-      case 'openCamera':
+      case 'open-camera':
         startCameraDetect();
         break;
-      case 'closeCamera':
+      case 'close-camera':
         closeCamera();
         break;
     }
-    return true;
-  });
-};
+  }
 
-createCameraDom();
-messageConnect();
+  messageConnect() {
+    let port = chrome.runtime.connect({
+      name: "content"
+    });
 
-console.log(`Motion-NBA is ready`);
+    if(!port.onMessage.hasListener(this.handleMessage)) {
+      port.onMessage.addListener(this.handleMessage);
+    }
 
-// const eventHandler = (request, sender, sendResponse) => {
-//   chrome.runtime.onMessage.removeListener(eventHandler);
-//   console.log('收到来自background的消息：');
-//   console.log(request, sender, sendResponse);
-//   if(request && request.cmd === 'disconnect') {
-//     removeCameraDom();
-//     chrome.storage.local.remove(['confidence']);
-//   }
-//   if(request && request.cmd === 'confidence') {
-//     chrome.storage.local.set({confidence: request.value});
-//   }
-//   return true;
-// };
-//
-// chrome.runtime.onMessage.addListener(eventHandler);
+  }
+}
+
+new Content().init();
 
 
