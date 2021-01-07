@@ -62,7 +62,7 @@ export function startCameraDetect() {
     }
   }
 
-  navigator.mozGetUserMedia({audio: false, video: true}).then(function (stream) {
+  navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(function (stream) {
     // 旧的浏览器可能没有srcObject
     if ("srcObject" in video) {
       video.srcObject = stream;

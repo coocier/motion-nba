@@ -33,7 +33,7 @@ class Panel {
 
   initBridge() {
     this.port = browser.runtime.connect({
-      name: 'panel',
+      name: 'panel'
     });
 
     if(!this.port.onMessage.hasListener(this.handleMessage)) {
