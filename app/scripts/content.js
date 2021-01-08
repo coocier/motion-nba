@@ -19,6 +19,8 @@ class Content {
 
     let parent = document.createElement('div');
     parent.setAttribute('id', 'motion-nba-content');
+    parent.setAttribute('width', document.body.clientWidth);
+    parent.setAttribute('height', document.body.clientHeight);
 
     let video = document.createElement('video');
     video.setAttribute('style','display:none');

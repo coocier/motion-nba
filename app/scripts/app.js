@@ -16,17 +16,17 @@ export function startCameraDetect() {
     var w = $(this).width();
     var h = $(this).height() - 110;
 
-    if (content.width() > w) {
-      content.width(w);
-      content.height(w / ratio);
-    } else {
-      content.height(h);
-      content.width(h * ratio);
-    }
+    // if (content.width() > w) {
+    //   content.width(w);
+    //   content.height(w / ratio);
+    // } else {
+    //   content.height(h);
+    //   content.width(h * ratio);
+    // }
     canvases.width(content.width());
     canvases.height(content.height());
-    content.css('left', (w - content.width()) / 2);
-    content.css('top', ((h - content.height()) / 2) + 55);
+    // content.css('left', (w - content.width()) / 2);
+    // content.css('top', ((h - content.height()) / 2) + 55);
   };
   $(window).resize(resize);
   $(window).ready(function () {
@@ -34,7 +34,7 @@ export function startCameraDetect() {
   });
 
   var webcamError = function (e) {
-    alert('请确保开启摄像头权限！', e);
+    console.log(e);
   };
 
   // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
@@ -62,7 +62,7 @@ export function startCameraDetect() {
     }
   }
 
-  navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(function (stream) {
+  navigator.mediaDevices.getUserMedia({video: true}).then( (stream) => {
     // 旧的浏览器可能没有srcObject
     if ("srcObject" in video) {
       video.srcObject = stream;
