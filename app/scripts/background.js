@@ -14,14 +14,14 @@ class Background {
     if(cmd && typeof cmd === 'string') {
       switch (cmd) {
         case 'panel-created':
-          browser.tabs.insertCSS({ file: 'styles/content.css' })
-          browser.tabs.executeScript({file: 'scripts/content.js'});
+          chrome.tabs.insertCSS({ file: 'styles/content.css' })
+          chrome.tabs.executeScript({file: 'scripts/content.js'});
           break;
         case 'panel-close':
           ports['panel'].postMessage({ cmd });
           break;
         case 'panel-open':
-
+          ports['panel'].postMessage({ cmd });
           break;
         case 'open-camera':
           ports['content'].postMessage({ cmd });

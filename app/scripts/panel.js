@@ -2,42 +2,55 @@ class Panel {
   constructor () {
     this.handleMessage = this.handleMessage.bind(this)
   }
-  init () {
-    this.destory();
-    this.initBridge();
-    this.utils();
-    this.eventBind();
-    this.getGameList();
 
+  init () {
+    this.destory()
+    this.setOptions();
+    this.initBridge()
+    this.utils()
+    this.eventBind()
+    this.getGameList()
+  }
+
+  setOptions(options) {
+    const originOptions = {
+      seconds: 2000,
+      maxRecords: 10
+    }
+    this.options = typeof options === 'object' ? Object.assign({}, options, originOptions) : originOptions
   }
 
   destory () {
-    clearInterval(this.recordsInterval);
+    clearInterval(this.recordsInterval)
   }
 
   sendMessageToBack (msgData) {
-    if(!this.port) this.initBridge();
+    if (!this.port) this.initBridge()
     this.port.postMessage(msgData)
   }
 
-  handleMessage({cmd, value}, port) {
-    if(cmd && typeof cmd === 'string') {
+  handleMessage ({ cmd, value }, port) {
+    if (cmd && typeof cmd === 'string') {
       switch (cmd) {
         case 'panel-close':
-          this.destory();
+          this.destory()
+          break
+        case 'panel-open':
+          this.currentGameId && this.getLiveContentInfo(this.currentGameId);
           break;
-        default: return
+        default:
+          return
       }
     }
   }
 
-  initBridge() {
-    this.port = browser.runtime.connect({
+  initBridge () {
+    this.port = chrome.runtime.connect({
       name: 'panel'
-    });
+    })
 
-    if(!this.port.onMessage.hasListener(this.handleMessage)) {
-      this.port.onMessage.addListener(this.handleMessage);
+    if (!this.port.onMessage.hasListener(this.handleMessage)) {
+      this.port.onMessage.addListener(this.handleMessage)
     }
   }
 
@@ -64,10 +77,10 @@ class Panel {
   eventBind () {
     // 是否开启摄像头监控
     $('#cameraDetect').off('change').on('change', (e) => {
-      let slider = $('#slider');
-      let sensorWrap = $('#sensor');
+      let slider = $('#slider')
+      let sensorWrap = $('#sensor')
       if (e.target.checked) {
-        let confidence = slider.val();
+        let confidence = slider.val()
         this.sendMessageToBack({ cmd: 'set-confidence', value: confidence })
         this.sendMessageToBack({ cmd: 'open-camera' })
         sensorWrap.show()
@@ -75,7 +88,7 @@ class Panel {
         this.sendMessageToBack({ cmd: 'close-camera' })
         sensorWrap.hide()
       }
-    });
+    })
 
     // 摄像头监控敏感度调整
     $('#slider').off('change').on('change', (e) => {
@@ -91,16 +104,17 @@ class Panel {
       $('#reload').show()
       $('#back').hide()
       this.getGameList()
+      this.currentGameId = null;
       clearInterval(this.recordsInterval)
     })
 
     $(document).off('click', '#gameListContent .list-group-item').on('click', '#gameListContent .list-group-item', (e) => {
-      let gameId = $(e.currentTarget).attr('data-id')
-      let gameOver = false
+      this.currentGameId = $(e.currentTarget).attr('data-id')
+      this.gameOver = false
       $('#gameLiveContent').show()
       $('#gameListContent').hide()
       $('#textRecords .content').html(null)
-      this.getGameInfo(gameId).then((data) => {
+      this.getGameInfo(this.currentGameId).then((data) => {
         let result = JSON.parse(data)
         $('.game-list-wrap .title').text(`${result.home_team}(主) VS ${result.visit_team}(客)`)
         $('#reload').hide()
@@ -111,16 +125,24 @@ class Panel {
         $('#visit .team').text(`(${result.visit_team})`).attr('title', `${result.visit_team}`)
         if (result.period_cn === '完赛') {
           $('#gameOver').show()
-          gameOver = true
+          //todo: 完赛之后 显示全队每节得分
+          this.gameOver = true
         } else {
           $('#gameOver').hide()
         }
       })
+      this.getLiveContentInfo(this.currentGameId);
 
-      clearInterval(this.recordsInterval)
-      let currentMaxSid = null
-      this.recordsInterval = setInterval(() => {
-        $('#textRecords .content').html(null)
+    })
+  }
+
+  getLiveContentInfo(gameId) {
+    clearInterval(this.recordsInterval)
+    let currentMaxSid = null
+    this.recordsInterval = setInterval(() => {
+      if (this.gameOver) {
+        clearInterval(this.recordsInterval)
+      } else {
         this.getMaxsid(gameId).then((maxSid) => {
           if (currentMaxSid === maxSid) return
           currentMaxSid = maxSid
@@ -176,29 +198,28 @@ class Panel {
             // user_chn: "戴普"
             // user_id: "10"
             // visit_score: "98"
-
+            let childsLength = $('#textRecords .content').children().length
+            if (childsLength > this.options.maxRecords - 2) {
+              $('#textRecords .content').children().splice(this.options.maxRecords - 2, childsLength).map(dom => dom.remove())
+            }
             let result = JSON.parse(data)
-
-            result.map((item) => {
-              $('#textRecords .content').append($(`
-              <div style="color: ${item.text_color}">【${item.live_time.substring(11)}】 ${item.live_text}</div>
-              `))
+            for (const item of result) {
+              $('#textRecords .content').prepend($(`
+                <div style="color: ${item.text_color}">【${item.live_time.substring(11)}】 ${item.live_text}</div>
+                `))
               $('#home .score').text(item.home_score)
               $('#visit .score').text(item.visit_score)
               if (item.pid_text === '比赛结束' || item.live_pid === '-1') {
                 clearInterval(this.recordsInterval)
                 $('#gameOver').show()
+                break
               }
-            })
+            }
 
           })
         })
-        if (gameOver) {
-          clearInterval(this.recordsInterval)
-          $('#textRecords .loading').hide()
-        }
-      }, 2000)
-    })
+      }
+    }, this.options.seconds)
   }
 
   getGameList () {
@@ -258,10 +279,10 @@ class Panel {
       type: 'GET',
       url: 'http://dingshi4pc.qiumibao.com/livetext/data/cache/max_sid/' + gameId + '/0.htm',
       beforeSend: () => {
-        $('#textRecords .loading').show()
+        // $('#textRecords .loading').show()
       },
       success: () => {
-        $('#textRecords .loading').hide()
+        // $('#textRecords .loading').hide()
       },
     })
   }
@@ -280,15 +301,15 @@ class Panel {
       type: 'GET',
       url: 'http://dingshi4pc.qiumibao.com/livetext/data/cache/livetext/' + gameId + '/0/lit_page_2/' + maxSid + '.htm',
       beforeSend: () => {
-        $('#textRecords .loading').show()
+        // $('#textRecords .loading').show()
       },
       success: () => {
-        $('#textRecords .loading').hide()
+        // $('#textRecords .loading').hide()
       },
       error: function (e) {
         console.error(e)
-        $('#textRecords .loading').hide()
-        $('#textRecords .content').html(`<div class="d-flex justify-content-center text-secondary">当前请求暂未返回数据</div>`)
+        // $('#textRecords .loading').hide()
+        // $('#textRecords .content').html(`<div class="d-flex justify-content-center text-secondary">当前请求暂未返回数据</div>`)
       }
     })
   }

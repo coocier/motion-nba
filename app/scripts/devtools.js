@@ -22,16 +22,17 @@ class devtools {
       console.log("panel is being hidden");
     }
 
-    browser.devtools.panels.create(
+    chrome.devtools.panels.create(
       'Motion NBA',                 // title
       '',           // icon
-      '/pages/panel.html' // content
-    ).then((newPanel) => {
-      this.initBridge();
-      this.sendMessageToBack({ cmd: 'panel-created' })
-      newPanel.onShown.addListener(handleShown);
-      newPanel.onHidden.addListener(handleHidden);
-    })
+      '/pages/panel.html', // content
+      newPanel => {
+        this.initBridge();
+        this.sendMessageToBack({ cmd: 'panel-created' })
+        newPanel.onShown.addListener(handleShown);
+        newPanel.onHidden.addListener(handleHidden);
+      }
+    )
   }
 
   handleMessage({cmd, value}, port) {
@@ -44,7 +45,7 @@ class devtools {
   }
 
   initBridge() {
-    this.port = browser.runtime.connect({
+    this.port = chrome.runtime.connect({
       name: 'devtools',
     });
 
